@@ -10,6 +10,7 @@
 
 ## 文檔
 - [Build PHP-FPM Docker Image](/docker/php-fpm/README.md)
+- [GitHub Container Registry設定及使用](/docs/GitHubContainerRegistry.md)
 
 
 
