@@ -1,6 +1,33 @@
 # Build PHP-FPM Docker Image
 
-## Build php-fpm
+## Build php-fpm using "make"
+```sh
+#  Goto PHP-FPM-${VERSION} Directory - ex. PHP-HPM 7.4
+$ cd docker/php-fpm/7.4
+
+# Build Prod image
+$ make prod
+
+# Push Prod image to GHCR
+$ make prod-up
+
+# Build Dev and push to GHCR
+$ make all-prod
+
+# Build Dev image
+$ make dev
+
+# Push Dev image to GHCR
+$ make dev-up
+
+# Build Dev and push to GHCR
+$ make all-dev
+
+# Build Prod&Dev and push both
+$ make all
+```
+
+## Manually build php-fpm
 
 ```bash
 VERSION=$(basename "$PWD")
