@@ -2,16 +2,16 @@ FROM php:7.4-fpm-alpine
 
 LABEL maintainer="Mars.Hung <tfaredxj@gmail.com>"
 
-# Environment Type: production/development（可以由 docker build --build-arg 傳入）
+# Environment Type: production/development (From docker build --build-arg)
 ARG APP_ENV=production
 ENV APP_ENV=${APP_ENV}
-# Build Date - environment variable
+# Build Date by CI/CD - environment variable
 ARG BUILD_DATE_ARG=19700101.000000+0000
 ENV BUILD_DATE_ARG=${BUILD_DATE_ARG}
-# Short SHA - environment variable
+# Short SHA for git commit - environment variable
 ARG SHORT_SHA_ARG=fff0000
 ENV SHORT_SHA_ARG=${SHORT_SHA_ARG}
-
+# Error Display by CI/CD or Autoset by APP_ENV next - environment variable
 ARG PHP_DISPLAY_ERRORS=Off
 ARG PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
 
@@ -19,30 +19,30 @@ ARG PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install system packages & PHP Extensions
-RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
-    && apk add --no-cache zip unzip curl bash shadow linux-headers libxml2-dev libzip-dev freetype-dev libjpeg-turbo-dev libpng-dev icu-dev oniguruma-dev \
-    && docker-php-ext-configure gd \
+RUN apk add --no-cache zip unzip curl linux-headers libgomp libcurl libxml2 libzip freetype libjpeg-turbo libpng icu-libs oniguruma imagemagick \
+    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS curl-dev libxml2-dev libzip-dev freetype-dev libjpeg-turbo-dev libpng-dev icu-dev oniguruma-dev imagemagick-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     # Install PHP Extensions
-    && docker-php-ext-install -j$(nproc) gd zip bcmath pdo_mysql opcache mbstring xml sockets intl \
+    && docker-php-ext-install -j$(nproc) gd zip curl bcmath pdo_mysql opcache mbstring xml sockets intl \
     # Install Redis (PECL)
-    && pecl install redis-5.3.7 \
-    && docker-php-ext-enable redis \
+    && pecl install redis-5.3.7 imagick \
+    && docker-php-ext-enable redis imagick \
     # Clean install tools
     && apk del --no-network .build-deps
 
-# Development Environment
-RUN if [ "$APP_ENV" = "development" ]; then \
-        echo "🔧 Install Development Tools..." \
-        && apk add --no-cache iproute2 iputils busybox-extras net-tools bind-tools nano wget htop vim tcpdump git openssh-client \
-        && echo "🔧 Use Development configuration..." \
-        && cp "${PHP_INI_DIR}/php.ini-development" "${PHP_INI_DIR}/php.ini"; \
-    fi
-
-# Production Environment
-RUN if [ "$APP_ENV" = "production" ]; then \
-        echo "🔧 Use Production configuration..." \
-        && cp "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"; \
-    fi
+# Setup PHP Environment By APP_ENV
+RUN case "$APP_ENV" in \
+        development) \
+            echo "🔧 Development Environment..." && \
+            apk add --no-cache bash shadow iproute2 iputils busybox-extras net-tools bind-tools nano wget htop vim tcpdump git openssh-client && \
+            cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" && \
+            echo 'export PS1="\u@\h:\w\\$ "' >> /etc/profile \
+        ;; \
+        production) \
+            echo "🔧 Production Environment..." && \
+            cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+        ;; \
+    esac
 
 # PHP ini default
 ENV PHP_EXPOSE_PHP=Off
