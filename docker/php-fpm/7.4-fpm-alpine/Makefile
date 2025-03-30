@@ -34,12 +34,12 @@ dev:
 		--build-arg PHP_OPCACHE_VALIDATE_TIMESTAMPS=0 \
 		--build-arg BUILD_DATE_ARG=$(BUILD_TIME) \
 		--build-arg SHORT_SHA_ARG=$(SHORT_SHA) \
-		-t ghcr.io/$(USERNAME)/php:$(VERSION)-fpm-dev \
-		-t php:$(VERSION)-fpm-dev .
+		-t ghcr.io/$(USERNAME)/php:$(VERSION)-dev \
+		-t php:$(VERSION)-dev .
 
 # 將開發環境的 image push 到 GHCR
 dev-up:
-	docker push ghcr.io/$(USERNAME)/php:$(VERSION)-fpm-dev
+	docker push ghcr.io/$(USERNAME)/php:$(VERSION)-dev
 
 # 建立正式環境用的 Docker image
 prod:
@@ -49,10 +49,10 @@ prod:
 		--build-arg PHP_OPCACHE_VALIDATE_TIMESTAMPS=0 \
 		--build-arg BUILD_DATE_ARG=$(BUILD_TIME) \
 		--build-arg SHORT_SHA_ARG=$(SHORT_SHA) \
-		-t ghcr.io/$(USERNAME)/php:$(VERSION)-fpm-prod \
-		-t php:$(VERSION)-fpm-prod .
+		-t ghcr.io/$(USERNAME)/php:$(VERSION) \
+		-t php:$(VERSION) .
 
 # 將正式環境的 image push 到 GHCR
 prod-up:
-	docker push ghcr.io/$(USERNAME)/php:$(VERSION)-fpm-prod
+	docker push ghcr.io/$(USERNAME)/php:$(VERSION)
 

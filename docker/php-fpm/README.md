@@ -2,8 +2,8 @@
 
 ## Build php-fpm using "make"
 ```sh
-#  Goto PHP-FPM-${VERSION} Directory - ex. PHP-HPM 7.4
-$ cd docker/php-fpm/7.4
+# Goto PHP-FPM-${VERSION} Directory - ex. PHP-HPM 7.4
+$ cd docker/php-fpm/7.4-fpm-alpine
 
 # Build Prod image
 $ make prod
@@ -11,8 +11,8 @@ $ make prod
 # Push Prod image to GHCR
 $ make prod-up
 
-# Build Dev and push to GHCR
-$ make all-prod
+# Build Prod image and push to GHCR
+$ make prod-all
 
 # Build Dev image
 $ make dev
@@ -20,16 +20,17 @@ $ make dev
 # Push Dev image to GHCR
 $ make dev-up
 
-# Build Dev and push to GHCR
-$ make all-dev
+# Build Dev image and push to GHCR
+$ make dev-all
 
-# Build Prod&Dev and push both
+# Build Prod&Dev image and push both
 $ make all
 ```
 
 ## Manually build php-fpm
 
 ```bash
+# Build parameters
 VERSION=$(basename "$PWD")
 USERNAME=marshung24
 SHORT_SHA=`git log -1 --format='%H' | cut -c1-8`
@@ -46,11 +47,11 @@ docker build --pull --rm --no-cache \
     --build-arg PHP_OPCACHE_VALIDATE_TIMESTAMPS=0 \
     --build-arg BUILD_DATE_ARG=${BUILD_TIME} \
     --build-arg SHORT_SHA_ARG=${SHORT_SHA} \
-    -t ghcr.io/${USERNAME}/php:${VERSION}-fpm-prod \
-    -t php:${VERSION}-fpm-prod .
+    -t ghcr.io/${USERNAME}/php:${VERSION} \
+    -t php:${VERSION} .
 
 ## Push
-docker push ghcr.io/${USERNAME}/php:${VERSION}-fpm-prod
+docker push ghcr.io/${USERNAME}/php:${VERSION}
 
 
 # Build dev image & push
@@ -61,24 +62,24 @@ docker build --pull --rm --no-cache \
     --build-arg PHP_OPCACHE_VALIDATE_TIMESTAMPS=1 \
     --build-arg BUILD_DATE_ARG=${BUILD_TIME} \
     --build-arg SHORT_SHA_ARG=${SHORT_SHA} \
-    -t ghcr.io/${USERNAME}/php:${VERSION}-fpm-dev \
-    -t php:${VERSION}-fpm-dev .
+    -t ghcr.io/${USERNAME}/php:${VERSION}-dev \
+    -t php:${VERSION}-dev .
 
 ## Push
-docker push ghcr.io/${USERNAME}/php:${VERSION}-fpm-dev
+docker push ghcr.io/${USERNAME}/php:${VERSION}-dev
 ```
 
 ## Troubleshooting
 ### Run container
 ```sh
-# 使用互動模式(-it)啟動容器並進入到bash，容器名稱(--name) php-fpm-test 、映像檔 php:7.4-fpm-dev ，埠號映射(-p) 9000 to host:9000，用完即關(--rm)
-$ docker run -it --rm -p 9000:9000 --name php-fpm-test php:7.4-fpm-dev bash
+# 使用互動模式(-it)啟動容器並進入到bash，容器名稱(--name) php-fpm-dev 、映像檔 php:7.4-fpm-alpine-dev ，埠號映射(-p) 9000 to host:9000，用完即關(--rm)
+$ docker run -it --rm -p 9000:9000 --name php-fpm-dev php:7.4-fpm-alpine-dev bash
 
 # 使用服務模式(-d)啟動容器
-$ docker run -d --name php-fpm-test php:7.4-fpm-dev
+$ docker run -d --name php-fpm-dev php:7.4-fpm-alpine-dev
 
 # 進入容器 - 使用互動模式(-it)
-$ docker exec -it php-fpm-test sh
+$ docker exec -it php-fpm-dev sh
 
 # 查看php模組
 $ php -m
@@ -87,11 +88,11 @@ $ php -m
 $ php -i
 
 # 停止並移除容器
-$ docker stop php-fpm-test
-$ docker rm php-fpm-test
+$ docker stop php-fpm-dev
+$ docker rm php-fpm-dev
 
 # 強制移除(-f)容器
-$ docker rm -f php-fpm-test
+$ docker rm -f php-fpm-dev
 ```
 
 ## Referance
