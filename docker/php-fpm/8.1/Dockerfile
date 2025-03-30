@@ -36,7 +36,7 @@ RUN case "$APP_ENV" in \
             echo "🔧 Development Environment..." && \
             apk add --no-cache bash shadow iproute2 iputils busybox-extras net-tools bind-tools nano wget htop vim tcpdump git openssh-client && \
             cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" && \
-            echo 'export PS1="\u@\h:\w\\$ "' >> /etc/profile \
+            echo 'export PS1="\u@\h:\w\\$ "' >> /etc/bash/bashrc \
         ;; \
         production) \
             echo "🔧 Production Environment..." && \
