@@ -19,7 +19,7 @@ ARG PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install system packages & PHP Extensions
-RUN apk add --no-cache zip unzip curl linux-headers libgomp libcurl libxml2 libzip freetype libjpeg-turbo libpng icu-libs oniguruma imagemagick \
+RUN apk add --no-cache zip unzip curl linux-headers libgomp libcurl libxml2 libzip freetype libjpeg-turbo libpng icu-libs oniguruma imagemagick tzdata \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS curl-dev libxml2-dev libzip-dev freetype-dev libjpeg-turbo-dev libpng-dev icu-dev oniguruma-dev imagemagick-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     # Install PHP Extensions
@@ -34,7 +34,8 @@ RUN apk add --no-cache zip unzip curl linux-headers libgomp libcurl libxml2 libz
 RUN case "$APP_ENV" in \
         development) \
             echo "🔧 Development Environment..." && \
-            apk add --no-cache bash shadow iproute2 iputils busybox-extras net-tools bind-tools nano wget htop vim tcpdump git openssh-client && \
+            apk add --no-cache bash shadow iproute2 iputils busybox-extras net-tools bind-tools nano wget htop vim tcpdump git bash-completion openssh-client \
+            graphviz openjdk17-jre && \
             cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" && \
             echo 'export PS1="\u@\h:\w\\$ "' >> /etc/bash/bashrc \
         ;; \
@@ -44,13 +45,17 @@ RUN case "$APP_ENV" in \
         ;; \
     esac
 
+# 設定台北時區
+RUN cp /usr/share/zoneinfo/Asia/Taipei /etc/localtime && \
+    echo "Asia/Taipei" > /etc/timezone
+
 # PHP ini default
 ENV PHP_EXPOSE_PHP=Off
-ENV PHP_MEMORY_LIMIT=256M
-ENV PHP_POST_MAX_SIZE=20M
-ENV PHP_UPLOAD_MAX_FILESIZE=10M
+ENV PHP_MEMORY_LIMIT=512M
+ENV PHP_POST_MAX_SIZE=25M
+ENV PHP_UPLOAD_MAX_FILESIZE=20M
 ENV PHP_MAX_FILE_UPLOADS=20
-ENV PHP_MAX_INPUT_VARS=5000
+ENV PHP_MAX_INPUT_VARS=9999
 ENV PHP_MAX_EXECUTION_TIME=30
 # Development:On ; Production:Off
 ENV PHP_DISPLAY_ERRORS=${PHP_DISPLAY_ERRORS}
@@ -73,11 +78,11 @@ ENV PHP_OPCACHE_REVALIDATE_FREQUENCY=0
 # Development:1 ; Production:0
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=${PHP_OPCACHE_VALIDATE_TIMESTAMPS}
 
-# PHP-FPM defaults
+# PHP-FPM defaults, ex: Ram 8G
 ENV PHP_FPM_PM=dynamic
-ENV PHP_FPM_MAX_CHILDREN=400
-ENV PHP_FPM_START_SERVERS=100
-ENV PHP_FPM_MIN_SPARE_SERVERS=80
+ENV PHP_FPM_MAX_CHILDREN=140
+ENV PHP_FPM_START_SERVERS=80
+ENV PHP_FPM_MIN_SPARE_SERVERS=40
 ENV PHP_FPM_MAX_SPARE_SERVERS=120
 ENV PHP_FPM_MAX_REQUESTS=1000
 

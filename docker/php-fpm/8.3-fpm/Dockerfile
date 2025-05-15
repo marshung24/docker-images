@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.3-fpm
 
 LABEL maintainer="Mars.Hung <tfaredxj@gmail.com>"
 
@@ -21,7 +21,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Install system packages & PHP Extensions
 # 安裝系統套件與 PHP 擴充
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        zip unzip curl gnupg2 imagemagick libmagickwand-dev \
+        zip unzip curl gnupg2 imagemagick libmagickwand-dev tzdata \
         libgomp1 libcurl4-openssl-dev libxml2 libxml2-dev \
         libzip-dev libfreetype6-dev libjpeg-dev libpng-dev \
         libicu-dev libonig-dev \
@@ -41,7 +41,8 @@ RUN case "$APP_ENV" in \
             echo "🔧 Development Environment..." && \
             apt-get install -y --no-install-recommends \
                 bash net-tools iputils-ping dnsutils \
-                iproute2 nano wget htop vim tcpdump git openssh-client && \
+                iproute2 nano wget htop vim tcpdump git bash-completion openssh-client \
+                graphviz openjdk-17-jre-headless && \
             cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" && \
             echo 'export PS1="\u@\h:\w\\$ "' >> /etc/bash.bashrc \
         ;; \
@@ -54,13 +55,17 @@ RUN case "$APP_ENV" in \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# 設定台北時區
+RUN cp /usr/share/zoneinfo/Asia/Taipei /etc/localtime && \
+    echo "Asia/Taipei" > /etc/timezone
+
 # PHP ini default
 ENV PHP_EXPOSE_PHP=Off
-ENV PHP_MEMORY_LIMIT=256M
-ENV PHP_POST_MAX_SIZE=20M
-ENV PHP_UPLOAD_MAX_FILESIZE=10M
+ENV PHP_MEMORY_LIMIT=512M
+ENV PHP_POST_MAX_SIZE=25M
+ENV PHP_UPLOAD_MAX_FILESIZE=20M
 ENV PHP_MAX_FILE_UPLOADS=20
-ENV PHP_MAX_INPUT_VARS=5000
+ENV PHP_MAX_INPUT_VARS=9999
 ENV PHP_MAX_EXECUTION_TIME=30
 # Development:On ; Production:Off
 ENV PHP_DISPLAY_ERRORS=${PHP_DISPLAY_ERRORS}
@@ -83,11 +88,11 @@ ENV PHP_OPCACHE_REVALIDATE_FREQUENCY=0
 # Development:1 ; Production:0
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=${PHP_OPCACHE_VALIDATE_TIMESTAMPS}
 
-# PHP-FPM defaults
+# PHP-FPM defaults, ex: Ram 8G
 ENV PHP_FPM_PM=dynamic
-ENV PHP_FPM_MAX_CHILDREN=400
-ENV PHP_FPM_START_SERVERS=100
-ENV PHP_FPM_MIN_SPARE_SERVERS=80
+ENV PHP_FPM_MAX_CHILDREN=140
+ENV PHP_FPM_START_SERVERS=80
+ENV PHP_FPM_MIN_SPARE_SERVERS=40
 ENV PHP_FPM_MAX_SPARE_SERVERS=120
 ENV PHP_FPM_MAX_REQUESTS=1000
 

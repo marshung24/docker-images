@@ -95,6 +95,14 @@ $ docker rm php-fpm-dev
 $ docker rm -f php-fpm-dev
 ```
 
+## OS Package List
+- PlantUML
+  - graphviz
+  - openjdk-17-jre-headless, openjdk17-jre
+
+## PHP Package List
+
+
 ## Referance
 1. [PHP: The configuration file](https://www.php.net/manual/en/configuration.file.php#configuration.file): Environment variables can be referenced within configuration values in php.ini as shown below.
 2. [Docker PHP/PHP-FPM Configuration via Environment Variables](https://jtreminio.com/blog/docker-php-php-fpm-configuration-via-environment-variables/) : A little-known fact is that PHP’s INI file (and PHP-FPM conf, too!) can be configured normally,but it can also read env vars!
