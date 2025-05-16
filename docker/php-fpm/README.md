@@ -96,12 +96,38 @@ $ docker rm -f php-fpm-dev
 ```
 
 ## OS Package List
-- PlantUML
-  - graphviz
-  - openjdk-17-jre-headless, openjdk17-jre
+### All
+- zip
+- curl
+- imagemagick
+- xml
+- wkhtmltopdf
+
+### Dev
+- bash
+- net-tools
+- htop
+- vim
+- git
+- openssh
+- graphviz
+  - PlantUML
+- openjdk-17-jre-headless, openjdk17-jre
+  - PlantUML
 
 ## PHP Package List
-
+- gd
+- zip
+- curl
+- bcmath
+- pdo_mysql
+- opcache
+- mbstring
+- xml
+- sockets
+- intl
+- redis
+- imagick
 
 ## Referance
 1. [PHP: The configuration file](https://www.php.net/manual/en/configuration.file.php#configuration.file): Environment variables can be referenced within configuration values in php.ini as shown below.

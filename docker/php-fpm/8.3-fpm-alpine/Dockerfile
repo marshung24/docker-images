@@ -1,3 +1,4 @@
+FROM surnet/alpine-wkhtmltopdf:3.20.0-0.12.6-small AS wkhtmltopdf
 FROM php:8.3-fpm-alpine
 
 LABEL maintainer="Mars.Hung <tfaredxj@gmail.com>"
@@ -15,8 +16,23 @@ ENV SHORT_SHA_ARG=${SHORT_SHA_ARG}
 ARG PHP_DISPLAY_ERRORS=Off
 ARG PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
 
+# Copy wkhtmltopdf files from docker-wkhtmltopdf image
+COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/wkhtmltopdf
+
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Install dependencies for wkhtmltopdf
+RUN apk upgrade --no-cache tar curl && \ 
+    apk add --no-cache libstdc++ libx11 libxrender openssl-dev xvfb-run && \
+    apk add --no-cache fontconfig freetype ttf-dejavu ttf-droid ttf-freefont ttf-liberation && \
+    apk add --no-cache --virtual .build-deps msttcorefonts-installer && \
+    # Install microsoft fonts
+    update-ms-fonts && \
+    fc-cache -f && \
+    # Clean up when done
+    rm -rf /tmp/* && \
+    apk del .build-deps
 
 # Install system packages & PHP Extensions
 RUN apk add --no-cache zip unzip curl linux-headers libgomp libcurl libxml2 libzip freetype libjpeg-turbo libpng icu-libs oniguruma imagemagick tzdata \
@@ -34,10 +50,14 @@ RUN apk add --no-cache zip unzip curl linux-headers libgomp libcurl libxml2 libz
 RUN case "$APP_ENV" in \
         development) \
             echo "🔧 Development Environment..." && \
-            apk add --no-cache bash shadow iproute2 iputils busybox-extras net-tools bind-tools nano wget htop vim tcpdump git bash-completion openssh-client \
+            apk add --no-cache bash shadow iproute2 iputils busybox-extras net-tools bind-tools wget htop tcpdump openssh-client vim nano \
+            # Git
+            git bash-completion \
+            # PlantUML
             graphviz openjdk17-jre && \
             cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" && \
-            echo 'export PS1="\u@\h:\w\\$ "' >> /etc/bash/bashrc \
+            echo 'export PS1="\u@\h:\w\\$ "' >> /etc/bash/bashrc && \
+            sed -i 's|/bin/ash|/bin/bash|g' /etc/passwd \
         ;; \
         production) \
             echo "🔧 Production Environment..." && \

@@ -18,6 +18,27 @@ ARG PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Install dependencies for wkhtmltopdf
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        curl libxext6 libssl3 ca-certificates libx11-6 libxrender1 xvfb \
+        fontconfig libfreetype6 fonts-dejavu-core fonts-droid-fallback \
+        fonts-freefont-ttf fonts-liberation && \
+    # 強制更新字型快取
+    fc-cache -f && \
+    # 下載 libssl1.1 amd64
+    #curl -SL http://archive.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1n-0+deb10u3_amd64.deb -o libssl1.1.deb && \
+    # 下載 libssl1.1 arm64
+    curl -SL http://archive.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1n-0+deb10u3_arm64.deb -o libssl1.1.deb && \
+    dpkg -i libssl1.1.deb && \
+    # 下載 wkhtmltopdf amd64 https://wkhtmltopdf.org/downloads.html
+    # curl -SL https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb -o wkhtmltopdf.deb && \
+    # 下載 wkhtmltopdf arm64
+    curl -SL https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_arm64.deb -o wkhtmltopdf.deb && \
+    # 安裝 wkhtmltopdf
+    apt-get install -y ./wkhtmltopdf.deb && \
+    # Clean up when done
+    apt-get clean && rm -rf /var/lib/apt/lists/* wkhtmltopdf.deb libssl1.1.deb
+
 # Install system packages & PHP Extensions
 # 安裝系統套件與 PHP 擴充
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -44,7 +65,11 @@ RUN case "$APP_ENV" in \
                 iproute2 nano wget htop vim tcpdump git bash-completion openssh-client \
                 graphviz openjdk-17-jre-headless && \
             cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" && \
-            echo 'export PS1="\u@\h:\w\\$ "' >> /etc/bash.bashrc \
+            echo 'export PS1="\u@\h:\w\\$ "' >> /etc/bash.bashrc && \
+            # 啟用 bash-completion
+            echo "if [ -f /usr/share/bash-completion/bash_completion ]; then" >> /etc/bash.bashrc && \
+            echo "    . /usr/share/bash-completion/bash_completion" >> /etc/bash.bashrc && \
+            echo "fi" >> /etc/bash.bashrc \
         ;; \
         production) \
             echo "🔧 Production Environment..." && \
