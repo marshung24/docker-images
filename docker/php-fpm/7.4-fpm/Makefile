@@ -49,8 +49,8 @@ prod:
 		--build-arg PHP_OPCACHE_VALIDATE_TIMESTAMPS=0 \
 		--build-arg BUILD_DATE_ARG=$(BUILD_TIME) \
 		--build-arg SHORT_SHA_ARG=$(SHORT_SHA) \
-		-t ghcr.io/$(USERNAME)/php:$(VERSION) \
-		-t php:$(VERSION) .
+		-t ghcr.io/$(USERNAME)/php:$(VERSION)-prod \
+		-t php:$(VERSION)-prod .
 
 # 將正式環境的 image push 到 GHCR
 prod-up:
