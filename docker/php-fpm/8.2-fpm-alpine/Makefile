@@ -30,8 +30,8 @@ prod-all: prod prod-up
 dev:
 	docker build --pull --rm --no-cache \
 		--build-arg APP_ENV=development \
-		--build-arg PHP_DISPLAY_ERRORS=Off \
-		--build-arg PHP_OPCACHE_VALIDATE_TIMESTAMPS=0 \
+		--build-arg PHP_DISPLAY_ERRORS=On \
+		--build-arg PHP_OPCACHE_VALIDATE_TIMESTAMPS=1 \
 		--build-arg BUILD_DATE_ARG=$(BUILD_TIME) \
 		--build-arg SHORT_SHA_ARG=$(SHORT_SHA) \
 		-t ghcr.io/$(USERNAME)/php:$(VERSION)-dev \
